@@ -1,0 +1,1410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lease vs. Buy Car Calculator | Rupee Stories</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:    #0f1e35;
+    --navy2:   #162845;
+    --navy3:   #1e3560;
+    --gold:    #c9a84c;
+    --gold2:   #e8c96a;
+    --cream:   #f5f0e8;
+    --cream2:  #ede8de;
+    --text:    #1a2e4a;
+    --muted:   #5a7090;
+    --muted2:  #8aaac8;
+    --green:   #2d8a5e;
+    --green2:  #e8f5ee;
+    --red:     #c0392b;
+    --red2:    #fdf0ee;
+    --blue:    #1a6fa8;
+    --blue2:   #e8f2fa;
+    --border:  #d0dcea;
+    --shadow:  0 2px 16px rgba(15,30,53,0.10);
+    --shadow2: 0 4px 32px rgba(15,30,53,0.16);
+    --radius:  10px;
+    --mono: 'DM Mono', 'Courier New', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --serif: 'Playfair Display', Georgia, serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--cream);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ───────────────────────────────────────── */
+  .site-header {
+    background: var(--navy);
+    padding: 32px 24px 28px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 500px; height: 120px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.35);
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+  }
+  .site-header h1 {
+    font-family: var(--serif);
+    font-size: clamp(26px, 5vw, 40px);
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .site-header h1 span { color: var(--gold); }
+  .site-header p {
+    font-size: 13px;
+    color: var(--muted2);
+    font-family: var(--mono);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── SUMMARY BAR ──────────────────────────────────── */
+  .summary-bar {
+    background: var(--navy2);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    padding: 12px 20px;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .sum-card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 10px 16px;
+    flex: 1;
+    min-width: 120px;
+    white-space: nowrap;
+  }
+  .sum-card.winner {
+    background: rgba(201,168,76,0.12);
+    border-color: rgba(201,168,76,0.4);
+    flex: 1.3;
+  }
+  .sum-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 4px;
+  }
+  .sum-value {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 500;
+    color: #fff;
+  }
+  .sum-card.winner .sum-value { color: var(--gold); font-size: 20px; }
+  .sum-sub {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+    font-family: var(--mono);
+  }
+
+  /* ── TABS ─────────────────────────────────────────── */
+  .tab-bar {
+    background: #fff;
+    border-bottom: 2px solid var(--border);
+    padding: 0 20px;
+    display: flex;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(15,30,53,0.06);
+  }
+  .tab-btn {
+    padding: 14px 18px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .tab-btn:hover { color: var(--navy); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--gold); font-weight: 600; }
+
+  /* ── MAIN LAYOUT ──────────────────────────────────── */
+  .main { max-width: 820px; margin: 0 auto; padding: 28px 16px 60px; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── SECTION HEADS ────────────────────────────────── */
+  .sec-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-head-icon {
+    width: 32px; height: 32px;
+    background: var(--navy);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .sec-head h2 {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sec-head h2 span { color: var(--gold); }
+
+  /* ── FORM GRID ────────────────────────────────────── */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media(max-width: 560px) { .form-grid { grid-template-columns: 1fr; } }
+
+  .field { margin-bottom: 4px; }
+  .field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 5px;
+  }
+  .field-label span {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+  .field-help {
+    font-size: 10px;
+    color: var(--muted2);
+    text-align: right;
+    max-width: 160px;
+    line-height: 1.3;
+  }
+
+  .inp-wrap { position: relative; display: flex; align-items: center; }
+  .inp-pre, .inp-suf {
+    position: absolute;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    pointer-events: none;
+    z-index: 1;
+  }
+  .inp-pre { left: 11px; }
+  .inp-suf { right: 11px; }
+
+  input[type=number] {
+    width: 100%;
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    -moz-appearance: textfield;
+  }
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
+  input[type=number]:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+  .has-pre input[type=number] { padding-left: 28px; }
+  .has-suf input[type=number] { padding-right: 46px; }
+  .has-pre.has-suf input[type=number] { padding-left: 28px; padding-right: 46px; }
+
+  /* Toggle buttons */
+  .toggle-row { display: flex; gap: 6px; margin-top: 2px; }
+  .toggle-btn {
+    flex: 1;
+    padding: 8px 0;
+    border: 1.5px solid var(--border);
+    border-radius: 7px;
+    background: #fff;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: center;
+  }
+  .toggle-btn.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--gold);
+  }
+
+  /* ── BREAKDOWN CARDS ──────────────────────────────── */
+  .breakdown-card {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-top: 20px;
+    color: #fff;
+  }
+  .breakdown-card .bc-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 12px;
+  }
+  .kv-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-family: var(--mono);
+    font-size: 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .kv-row .kv-k { color: rgba(255,255,255,0.55); }
+  .kv-row .kv-v { color: var(--gold2); }
+  .kv-row.kv-total {
+    border-bottom: none;
+    border-top: 1px solid rgba(201,168,76,0.25);
+    margin-top: 6px;
+    padding-top: 8px;
+    font-weight: 600;
+  }
+  .kv-row.kv-total .kv-k { color: rgba(255,255,255,0.8); }
+  .kv-row.kv-total .kv-v { color: #fff; font-size: 14px; }
+  .bc-note {
+    margin-top: 10px;
+    font-size: 10px;
+    color: rgba(255,255,255,0.3);
+    line-height: 1.6;
+    font-family: var(--mono);
+  }
+  .bc-warn {
+    margin-top: 10px;
+    background: rgba(192,57,43,0.15);
+    border: 1px solid rgba(192,57,43,0.3);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 11px;
+    color: #f08070;
+    font-family: var(--mono);
+  }
+  .bc-info {
+    margin-top: 10px;
+    background: rgba(45,138,94,0.1);
+    border: 1px solid rgba(45,138,94,0.25);
+    border-radius: 6px;
+    padding: 7px 12px;
+    font-size: 11px;
+    color: #6dbf96;
+    font-family: var(--mono);
+  }
+
+  /* ── DEP TABLE ────────────────────────────────────── */
+  .dep-grid { margin-top: 6px; }
+  .dep-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    font-family: var(--mono);
+    font-size: 11px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+  .dep-row .dep-yr { color: rgba(255,255,255,0.5); }
+  .dep-row .dep-rate { color: rgba(255,255,255,0.3); margin-left: 8px; }
+  .dep-row .dep-val { color: var(--gold2); }
+
+  /* ── OPS TABLE ────────────────────────────────────── */
+  .ops-table { width: 100%; }
+  .ops-row {
+    display: flex;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    font-family: var(--mono);
+    font-size: 12px;
+    align-items: center;
+  }
+  .ops-row .ops-label { flex: 1; color: rgba(255,255,255,0.55); }
+  .ops-row .ops-l { width: 90px; text-align: right; color: #7bafd4; }
+  .ops-row .ops-b { width: 90px; text-align: right; color: #6dbf96; }
+  .ops-row.ops-total { border-top: 1px solid rgba(201,168,76,0.25); border-bottom: none; margin-top: 4px; padding-top: 8px; font-weight: 600; }
+  .ops-row.ops-total .ops-label { color: rgba(255,255,255,0.7); }
+  .ops-legend { display: flex; gap: 16px; justify-content: flex-end; margin-bottom: 10px; font-family: var(--mono); font-size: 10px; }
+  .ops-legend .ol { color: #7bafd4; }
+  .ops-legend .ob { color: #6dbf96; }
+
+  /* ── RESULTS ──────────────────────────────────────── */
+  .winner-banner {
+    border-radius: var(--radius);
+    padding: 28px 24px;
+    text-align: center;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+  }
+  .winner-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 2px;
+  }
+  .winner-banner.buy-wins { background: linear-gradient(135deg, #e8f5ee 0%, #f0f8f3 100%); border: 1.5px solid #a8d8be; }
+  .winner-banner.buy-wins::before { background: linear-gradient(90deg, transparent, var(--green), transparent); }
+  .winner-banner.lease-wins { background: linear-gradient(135deg, var(--blue2) 0%, #f0f5fa 100%); border: 1.5px solid #a8c8e0; }
+  .winner-banner.lease-wins::before { background: linear-gradient(90deg, transparent, var(--blue), transparent); }
+  .winner-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .winner-word {
+    font-family: var(--serif);
+    font-size: clamp(32px, 6vw, 48px);
+    font-weight: 800;
+    margin-bottom: 6px;
+    line-height: 1.1;
+  }
+  .buy-wins .winner-word { color: var(--green); }
+  .lease-wins .winner-word { color: var(--blue); }
+  .winner-sub { font-size: 15px; color: var(--text); }
+  .winner-sub strong { color: var(--gold); font-weight: 700; }
+  .winner-note {
+    margin-top: 10px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--mono);
+  }
+
+  /* stat grid */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 22px; }
+  @media(max-width:480px) { .stat-grid { grid-template-columns: 1fr; } }
+  .stat-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .stat-card .sc-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .stat-card .sc-value {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .stat-card .sc-sub {
+    font-size: 10px;
+    color: var(--muted2);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+  .stat-card.green .sc-value { color: var(--green); }
+  .stat-card.blue  .sc-value { color: var(--blue); }
+  .stat-card.gold  .sc-value { color: #9a6e1a; }
+  .stat-card.red   .sc-value { color: var(--red); }
+
+  /* method card */
+  .method-card {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    color: rgba(255,255,255,0.65);
+    font-size: 13px;
+    line-height: 1.8;
+  }
+  .method-card .mc-title {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted2);
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  /* chart */
+  .chart-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: var(--shadow);
+  }
+  .chart-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .chart-sub { font-size: 11px; color: var(--muted2); margin-bottom: 16px; }
+  canvas { width: 100% !important; }
+
+  /* insights */
+  .insights-card {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .insights-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .insight-row {
+    display: flex;
+    gap: 12px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--cream);
+  }
+  .insight-row.warn { background: var(--red2); border-color: #e8b8b0; }
+  .insight-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .insight-body {}
+  .insight-head {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 3px;
+    letter-spacing: 0.03em;
+  }
+  .insight-row.warn .insight-head { color: var(--red); }
+  .insight-text { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+
+  /* ── YEAR TABLE ───────────────────────────────────── */
+  .table-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 14px;
+    line-height: 1.6;
+    font-family: var(--mono);
+  }
+  .table-wrap {
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow-x: auto;
+    box-shadow: var(--shadow);
+    margin-bottom: 16px;
+  }
+  table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: 12px; min-width: 620px; }
+  thead tr { background: var(--navy); }
+  thead th {
+    padding: 10px 14px;
+    text-align: right;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  thead th:first-child { text-align: center; }
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:nth-child(even) { background: var(--cream); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody td { padding: 8px 14px; text-align: right; color: var(--muted); }
+  tbody td:first-child { text-align: center; color: var(--muted2); }
+  td.win { font-weight: 700; color: var(--green); }
+  td.val-gold { color: #9a6e1a; }
+  td.val-blue { color: var(--blue); }
+
+  .assumptions-note {
+    background: var(--navy);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    line-height: 1.8;
+    font-family: var(--mono);
+  }
+  .assumptions-note strong { color: rgba(255,255,255,0.6); }
+
+  /* upfront table */
+  .upfront-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  @media(max-width:480px) { .upfront-row { grid-template-columns: 1fr; } }
+
+  .divider { margin: 28px 0; border: none; border-top: 1px solid var(--border); }
+
+  /* section spacing */
+  .sec-block { margin-bottom: 32px; }
+
+  /* mobile nav padding */
+  @media(max-width: 480px) {
+    .tab-btn { padding: 12px 12px; font-size: 10px; }
+    .site-header { padding: 24px 16px 20px; }
+    .main { padding: 20px 12px 60px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="badge">Rupee Stories Tools</div>
+  <h1>Lease vs. <span>Buy</span> Car Calculator</h1>
+  <p>Month-by-month engine &nbsp;|&nbsp; Staged depreciation &nbsp;|&nbsp; Opportunity cost &nbsp;|&nbsp; Running costs</p>
+</header>
+
+<!-- SUMMARY BAR -->
+<div class="summary-bar">
+  <div class="sum-card">
+    <div class="sum-label">Lease / mo (all-in)</div>
+    <div class="sum-value" id="s-lease-mo">—</div>
+    <div class="sum-sub" id="s-lease-sub">payment + ops</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Buy / mo (avg)</div>
+    <div class="sum-value" id="s-buy-mo">—</div>
+    <div class="sum-sub" id="s-buy-sub">loan + ops</div>
+  </div>
+  <div class="sum-card winner">
+    <div class="sum-label" id="s-winner-label">Winner</div>
+    <div class="sum-value" id="s-winner">—</div>
+    <div class="sum-sub" id="s-winner-sub"></div>
+  </div>
+</div>
+
+<!-- TAB BAR -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="lease">Lease</button>
+  <button class="tab-btn" data-tab="buy">Buy</button>
+  <button class="tab-btn" data-tab="ops">Running Costs</button>
+  <button class="tab-btn" data-tab="results">Results</button>
+  <button class="tab-btn" data-tab="table">Year-by-Year</button>
+</nav>
+
+<main class="main">
+
+  <!-- ══ LEASE TAB ══ -->
+  <div class="tab-panel active" id="panel-lease">
+
+    <div class="sec-block">
+      <div class="sec-head">
+        <div class="sec-head-icon">🚗</div>
+        <h2>Vehicle <span>&amp;</span> Comparison</h2>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label"><span>MSRP</span><span class="field-help">Used for residual calc</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="msrp" value="45000" step="500"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Negotiated Price</span><span class="field-help">Actual selling price</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="negPrice" value="43000" step="500"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Trade-in Value</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="tradeIn" value="0" step="500"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Rebates / Incentives</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="rebate" value="0" step="250"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Sales Tax Rate</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="salesTaxRate" value="8.5" step="0.1" min="0" max="15"><span class="inp-suf">%</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Annual Miles Driven</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="annualMiles" value="12000" step="500" min="1000"><span class="inp-suf">mi</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Compare Over</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="compareYears" value="6" min="2" max="12" step="1"><span class="inp-suf">yrs</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Investment Return</span><span class="field-help">If savings invested</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="investReturn" value="7" step="0.5" min="0" max="20"><span class="inp-suf">%/yr</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec-block">
+      <div class="sec-head">
+        <div class="sec-head-icon">🔑</div>
+        <h2>Lease <span>Terms</span></h2>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label"><span>Lease Term</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="leaseTerm" value="36" step="12" min="24" max="48"><span class="inp-suf">mo</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Money Factor</span><span class="field-help" id="mf-help">≈ — APR</span></div>
+          <div class="inp-wrap"><input type="number" id="moneyFactor" value="0.00125" step="0.00001" min="0"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Residual Value %</span><span class="field-help">% of MSRP at lease end</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="residualPct" value="55" step="0.5" min="20" max="90"><span class="inp-suf">%</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Lease Down Payment</span><span class="field-help">Cap cost reduction</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="leaseDown" value="2000" step="250"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Acquisition Fee</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="acqFee" value="895" step="50"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Disposition Fee</span><span class="field-help">Charged on return</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="disFee" value="395" step="25"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Security Deposit</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="secDeposit" value="0" step="100"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Deposit Refundable?</span></div>
+          <div class="toggle-row">
+            <button class="toggle-btn active" data-group="refundable" data-val="yes">Yes</button>
+            <button class="toggle-btn" data-group="refundable" data-val="no">No</button>
+          </div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Mileage Allowance</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="mileageLimit" value="12000" step="1000"><span class="inp-suf">mi/yr</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Overage Rate</span><span class="field-help">Per excess mile</span></div>
+          <div class="inp-wrap has-pre has-suf"><span class="inp-pre">$</span><input type="number" id="mileageOverage" value="0.25" step="0.01" min="0"><span class="inp-suf">/mi</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Wear &amp; Tear Charge</span><span class="field-help">Expected at return</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="wearTear" value="500" step="50"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Repeat Down at Renewal?</span></div>
+          <div class="toggle-row">
+            <button class="toggle-btn" data-group="repeatDown" data-val="yes">Yes</button>
+            <button class="toggle-btn active" data-group="repeatDown" data-val="no">No</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lease breakdown -->
+    <div class="breakdown-card" id="lease-breakdown">
+      <div class="bc-title">Lease Payment Breakdown</div>
+      <div class="kv-row"><span class="kv-k">Adjusted Cap Cost</span><span class="kv-v" id="bd-capCost">—</span></div>
+      <div class="kv-row"><span class="kv-k">Residual Value</span><span class="kv-v" id="bd-residual">—</span></div>
+      <div class="kv-row"><span class="kv-k">Depreciation Charge / mo</span><span class="kv-v" id="bd-dep">—</span></div>
+      <div class="kv-row"><span class="kv-k">Finance Charge / mo <span id="bd-apr-note" style="color:rgba(255,255,255,0.3)"></span></span><span class="kv-v" id="bd-fin">—</span></div>
+      <div class="kv-row"><span class="kv-k">Tax / mo</span><span class="kv-v" id="bd-tax">—</span></div>
+      <div class="kv-row kv-total"><span class="kv-k">Monthly Lease Payment</span><span class="kv-v" id="bd-total">—</span></div>
+      <div class="bc-note">Tax applied monthly on lease payment. Rules vary by state; some states collect differently.</div>
+      <div class="bc-warn" id="bd-mileage-warn" style="display:none"></div>
+      <div class="bc-info" id="bd-midlease-info" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ══ BUY TAB ══ -->
+  <div class="tab-panel" id="panel-buy">
+
+    <div class="sec-block">
+      <div class="sec-head">
+        <div class="sec-head-icon">🏦</div>
+        <h2>Loan <span>Details</span></h2>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label"><span>Down Payment</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="buyDown" value="5000" step="500"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Loan Term</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="loanTerm" value="60" step="12" min="24" max="84"><span class="inp-suf">mo</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Loan APR</span></div>
+          <div class="inp-wrap has-suf"><input type="number" id="loanAPR" value="6.5" step="0.1" min="0"><span class="inp-suf">%</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Origination Fee</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="loanFees" value="250" step="50"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Dealer Doc Fee</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="docFee" value="500" step="50"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Registration / Title</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="regFee" value="400" step="50"></div>
+        </div>
+      </div>
+      <div class="field" style="margin-top:8px">
+        <div class="field-label"><span>Sales Tax Applied On</span><span class="field-help">Rules vary by state</span></div>
+        <div class="toggle-row">
+          <button class="toggle-btn active" data-group="taxMode" data-val="full">Price minus trade-in</button>
+          <button class="toggle-btn" data-group="taxMode" data-val="pre_tradein">Full price only</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown-card">
+      <div class="bc-title">Buy Cost Breakdown</div>
+      <div class="kv-row"><span class="kv-k">Vehicle Sales Tax</span><span class="kv-v" id="bd-vtax">—</span></div>
+      <div class="kv-row"><span class="kv-k">Doc + Registration</span><span class="kv-v" id="bd-titlereg">—</span></div>
+      <div class="kv-row"><span class="kv-k">Total Loan Amount</span><span class="kv-v" id="bd-loan">—</span></div>
+      <div class="kv-row"><span class="kv-k">Total Interest Paid</span><span class="kv-v" id="bd-interest">—</span></div>
+      <div class="kv-row"><span class="kv-k">Upfront Cash Required</span><span class="kv-v" id="bd-upfront">—</span></div>
+      <div class="kv-row kv-total"><span class="kv-k">Monthly Loan Payment</span><span class="kv-v" id="bd-loanpmt">—</span></div>
+    </div>
+
+    <div class="breakdown-card" style="margin-top:16px">
+      <div class="bc-title">Staged Depreciation Schedule</div>
+      <div class="bc-note" style="margin-bottom:10px;margin-top:0">Year 1: 20% | Year 2: 15% | Year 3: 12% | Year 4: 10% | Year 5: 8% | Year 6: 7% | Year 7-8: 6% | Year 9+: 5%<br>Based on Edmunds/KBB industry patterns for average vehicles.</div>
+      <div class="dep-grid" id="dep-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ OPS TAB ══ -->
+  <div class="tab-panel" id="panel-ops">
+    <div class="sec-block">
+      <div class="sec-head">
+        <div class="sec-head-icon">🔧</div>
+        <h2>Running <span>Costs</span></h2>
+      </div>
+      <p style="margin-bottom:18px;color:var(--muted);font-size:13px;line-height:1.7">
+        These flow directly into the month-by-month cash comparison. Leases typically require higher insurance coverage (gap + lower deductibles). Buy maintenance is <em>stepped</em>: lower in warranty years, higher after year 3.
+      </p>
+      <div class="form-grid">
+        <div class="field">
+          <div class="field-label"><span>Lease Maintenance / yr</span><span class="field-help">Usually under warranty</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="leaseMaint" value="600" step="100"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Buy Maintenance / yr</span><span class="field-help">Stepped: rises after yr 3</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="buyMaint" value="1200" step="100"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Lease Insurance / yr</span><span class="field-help">Higher coverage required</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="leaseIns" value="2400" step="100"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Buy Insurance / yr</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="buyIns" value="2000" step="100"></div>
+        </div>
+        <div class="field">
+          <div class="field-label"><span>Annual Reg Renewal</span><span class="field-help">Same for both</span></div>
+          <div class="inp-wrap has-pre"><span class="inp-pre">$</span><input type="number" id="regRenewal" value="250" step="50"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="breakdown-card">
+      <div class="bc-title">Monthly Comparison</div>
+      <div class="ops-legend"><span class="ol">&#9632; Lease</span><span class="ob">&#9632; Buy</span></div>
+      <div id="ops-table-body"></div>
+      <div class="bc-note" style="margin-top:12px">Buy maintenance uses a stepped model in the engine: 55% of base in years 1-3, 100% in years 4-5, 145% in year 6+. Average shown above.</div>
+    </div>
+  </div>
+
+  <!-- ══ RESULTS TAB ══ -->
+  <div class="tab-panel" id="panel-results">
+
+    <div id="winner-banner" class="winner-banner buy-wins" style="display:none">
+      <div class="winner-label" id="wr-label">Over X Years - Economic Cost Analysis</div>
+      <div class="winner-word" id="wr-word">BUYING WINS</div>
+      <div class="winner-sub" id="wr-sub">by <strong id="wr-amt">—</strong> total economic advantage</div>
+      <div class="winner-note" id="wr-note"></div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card blue">
+        <div class="sc-label">Lease Economic Cost</div>
+        <div class="sc-value" id="res-lease-cost">—</div>
+        <div class="sc-sub">total paid minus invest gains</div>
+      </div>
+      <div class="stat-card green">
+        <div class="sc-label">Buy Economic Cost</div>
+        <div class="sc-value" id="res-buy-cost">—</div>
+        <div class="sc-sub">total paid minus car value minus invest</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Lease Invest Balance</div>
+        <div class="sc-value" id="res-lease-invest">—</div>
+        <div class="sc-sub" id="res-lease-invest-sub">from monthly savings</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Buy Invest Balance</div>
+        <div class="sc-value" id="res-buy-invest">—</div>
+        <div class="sc-sub" id="res-buy-invest-sub">from monthly savings</div>
+      </div>
+      <div class="stat-card gold">
+        <div class="sc-label">Estimated Resale Value</div>
+        <div class="sc-value" id="res-car-val">—</div>
+        <div class="sc-sub" id="res-car-sub">staged depreciation</div>
+      </div>
+      <div class="stat-card">
+        <div class="sc-label">Net Lease-End Settlement</div>
+        <div class="sc-value" id="res-lease-end">—</div>
+        <div class="sc-sub" id="res-lease-end-sub">disposition + wear/tear</div>
+      </div>
+    </div>
+
+    <div class="method-card">
+      <div class="mc-title">How This Is Calculated</div>
+      Every month, both scenarios' actual cash outflows are compared. Whoever spends less invests the difference — symmetrically for both sides. Upfront cash differences are handled the same way at month 0. Economic cost = total paid minus investment balance minus car value (buy only).
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Net Economic Cost Over Time</div>
+      <div class="chart-sub">Lower = better. Includes opportunity cost of every dollar spent.</div>
+      <canvas id="chart-cost" height="200"></canvas>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">Investment Balance + Car Value</div>
+      <div class="chart-sub">Monthly savings are invested symmetrically. The dashed line shows the car's remaining value.</div>
+      <canvas id="chart-invest" height="200"></canvas>
+    </div>
+
+    <div class="insights-card">
+      <div class="insights-title">Key Insights</div>
+      <div id="insights-body"></div>
+    </div>
+  </div>
+
+  <!-- ══ TABLE TAB ══ -->
+  <div class="tab-panel" id="panel-table">
+    <p class="table-note" id="table-note">Economic cost = total paid minus investment gains minus car value (buy). Bolded = winner that year.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Yr</th>
+            <th>Lease Paid</th>
+            <th>Lease Invest</th>
+            <th>Lease Cost</th>
+            <th>Buy Paid</th>
+            <th>Car Value</th>
+            <th>Buy Invest</th>
+            <th>Buy Cost</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+    <div class="assumptions-note" id="assumptions-note"></div>
+  </div>
+
+</main>
+
+<!-- Chart.js from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+// ─── Helpers ──────────────────────────────────────────────────────────
+const $ = (id) => document.getElementById(id);
+const fmt = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+const fmtM = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(n);
+const pct  = (n) => n.toFixed(2) + '%';
+const num  = (id) => parseFloat($(id).value) || 0;
+
+// ─── Toggle state ─────────────────────────────────────────────────────
+const toggleState = { refundable: 'yes', repeatDown: 'no', taxMode: 'full' };
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const g = btn.dataset.group;
+    toggleState[g] = btn.dataset.val;
+    document.querySelectorAll(`[data-group="${g}"]`).forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    recalc();
+  });
+});
+
+// ─── Depreciation ─────────────────────────────────────────────────────
+const DEP = [0.20, 0.15, 0.12, 0.10, 0.08, 0.07, 0.06, 0.06, 0.05, 0.05, 0.05, 0.05];
+function carVal(price, month) {
+  let v = price;
+  const fy = Math.floor(month / 12), rm = month % 12;
+  for (let y = 0; y < fy; y++) v *= (1 - (DEP[y] ?? DEP[DEP.length-1]));
+  if (rm > 0) { const r = DEP[fy] ?? DEP[DEP.length-1]; v *= Math.pow(1 - r, rm / 12); }
+  return Math.max(0, v);
+}
+
+function loanPmt(principal, apr, months) {
+  if (apr === 0) return principal / months;
+  const r = apr / 100 / 12;
+  return (principal * r * Math.pow(1+r, months)) / (Math.pow(1+r, months) - 1);
+}
+
+function buyMaintMonth(month, annualBase) {
+  const yr = Math.ceil(month / 12);
+  if (yr <= 3) return (annualBase * 0.55) / 12;
+  if (yr <= 5) return annualBase / 12;
+  return (annualBase * 1.45) / 12;
+}
+
+// ─── Main calculation ─────────────────────────────────────────────────
+function calc() {
+  const msrp          = num('msrp');
+  const negPrice      = num('negPrice');
+  const tradeIn       = num('tradeIn');
+  const rebate        = num('rebate');
+  const taxRate       = num('salesTaxRate') / 100;
+  const annualMiles   = num('annualMiles');
+  const compareYears  = Math.max(2, Math.round(num('compareYears')));
+  const investReturn  = num('investReturn');
+  const leaseTerm     = num('leaseTerm');
+  const mf            = num('moneyFactor');
+  const residualPct   = num('residualPct');
+  const leaseDown     = num('leaseDown');
+  const acqFee        = num('acqFee');
+  const disFee        = num('disFee');
+  const secDep        = num('secDeposit');
+  const mileLimit     = num('mileageLimit');
+  const mileOver      = num('mileageOverage');
+  const wearTear      = num('wearTear');
+  const buyDown       = num('buyDown');
+  const loanTrm       = num('loanTerm');
+  const loanAPR       = num('loanAPR');
+  const loanFees      = num('loanFees');
+  const docFee        = num('docFee');
+  const regFee        = num('regFee');
+  const leaseMaint    = num('leaseMaint');
+  const buyMaint      = num('buyMaint');
+  const leaseIns      = num('leaseIns');
+  const buyIns        = num('buyIns');
+  const regRenewal    = num('regRenewal');
+
+  const refundable    = toggleState.refundable === 'yes';
+  const repeatDown    = toggleState.repeatDown === 'yes';
+  const taxMode       = toggleState.taxMode;
+  const totalMonths   = compareYears * 12;
+  const monthReturn   = investReturn / 100 / 12;
+
+  // Lease payment
+  const residualVal   = msrp * (residualPct / 100);
+  const adjCapCost    = negPrice - leaseDown - tradeIn - rebate + acqFee;
+  const depMo         = (adjCapCost - residualVal) / leaseTerm;
+  const finCharge     = (adjCapCost + residualVal) * mf;
+  const basePayment   = depMo + finCharge;
+  const taxMo         = basePayment * taxRate;
+  const leasePmt      = basePayment + taxMo;
+
+  const excessMiles   = Math.max(0, annualMiles - mileLimit);
+  const mileagePenMo  = (excessMiles * mileOver) / 12;
+  const leaseMaintMo  = leaseMaint / 12;
+  const leaseInsMo    = leaseIns / 12;
+  const leaseRegMo    = regRenewal / 12;
+  const leaseMonthlyTotal = leasePmt + mileagePenMo + leaseMaintMo + leaseInsMo + leaseRegMo;
+  const leaseUpfront  = leaseDown + acqFee + secDep;
+
+  // Buy
+  const vehicleTax    = taxMode === 'full'
+    ? (negPrice - tradeIn) * taxRate
+    : negPrice * taxRate;
+  const titleReg      = docFee + regFee;
+  const loanAmt       = negPrice - buyDown - tradeIn - rebate + loanFees + titleReg + vehicleTax;
+  const monthlyLoan   = loanPmt(loanAmt, loanAPR, loanTrm);
+  const buyMaintAvg   = buyMaint / 12;
+  const buyInsMo      = buyIns / 12;
+  const buyRegMo      = regRenewal / 12;
+  const buyUpfront    = buyDown + vehicleTax + titleReg;
+  const buyMonthlyTotal = monthlyLoan + buyMaintAvg + buyInsMo + buyRegMo;
+
+  // Month-by-month
+  let leaseInvest = 0, buyInvest = 0;
+  let leasePaid = leaseUpfront, buyPaid = buyUpfront;
+  const upfrontDiff = buyUpfront - leaseUpfront;
+  if (upfrontDiff > 0) leaseInvest += upfrontDiff;
+  else if (upfrontDiff < 0) buyInvest += (-upfrontDiff);
+
+  const snapshots = [];
+
+  for (let m = 1; m <= totalMonths; m++) {
+    let lCash = leasePmt + mileagePenMo + leaseMaintMo + leaseInsMo + leaseRegMo;
+    if (m % leaseTerm === 0 && m < totalMonths) {
+      lCash += disFee;
+      if (refundable) lCash -= secDep;
+      lCash += acqFee + secDep;
+      if (repeatDown) lCash += leaseDown;
+    }
+    const bMaintM = buyMaintMonth(m, buyMaint);
+    let bCash = bMaintM + buyInsMo + buyRegMo;
+    if (m <= loanTrm) bCash += monthlyLoan;
+
+    leaseInvest *= (1 + monthReturn);
+    buyInvest   *= (1 + monthReturn);
+    if (lCash < bCash)      leaseInvest += (bCash - lCash);
+    else if (bCash < lCash) buyInvest   += (lCash - bCash);
+
+    leasePaid += lCash;
+    buyPaid   += bCash;
+
+    if (m % 12 === 0) {
+      const yr  = m / 12;
+      const cv  = carVal(negPrice, m);
+      snapshots.push({
+        year:               yr,
+        carValue:           Math.round(cv),
+        leasePaid:          Math.round(leasePaid),
+        buyPaid:            Math.round(buyPaid),
+        leaseInvest:        Math.round(leaseInvest),
+        buyInvest:          Math.round(buyInvest),
+        leaseEconCost:      Math.round(leasePaid - leaseInvest),
+        buyEconCost:        Math.round(buyPaid - cv - buyInvest),
+      });
+    }
+  }
+
+  // Final settlement
+  const endsAtBoundary = (totalMonths % leaseTerm === 0);
+  const lastEndCost = endsAtBoundary
+    ? disFee + wearTear - (refundable ? secDep : 0)
+    : 0;
+  const finalLeasePaid     = leasePaid + lastEndCost;
+  const finalCarVal        = carVal(negPrice, totalMonths);
+  const finalLeaseEconCost = finalLeasePaid - leaseInvest;
+  const finalBuyEconCost   = buyPaid - finalCarVal - buyInvest;
+
+  // Sync last snapshot
+  if (snapshots.length) {
+    const last = snapshots[snapshots.length - 1];
+    last.leasePaid      = Math.round(finalLeasePaid);
+    last.leaseEconCost  = Math.round(finalLeaseEconCost);
+    last.buyEconCost    = Math.round(finalBuyEconCost);
+  }
+
+  const buyWins   = finalBuyEconCost < finalLeaseEconCost;
+  const advantage = Math.abs(finalLeaseEconCost - finalBuyEconCost);
+  const loss3yr   = 1 - (1-0.20)*(1-0.15)*(1-0.12);
+
+  return {
+    msrp, negPrice, leaseTerm, mf, taxRate, compareYears, investReturn,
+    residualVal, adjCapCost, depMo, finCharge, basePayment, taxMo, leasePmt,
+    leaseMonthlyTotal, excessMiles, mileagePenMo, leaseUpfront,
+    vehicleTax, titleReg, loanAmt, monthlyLoan, buyMonthlyTotal, buyUpfront,
+    totalInterest: monthlyLoan * loanTrm - loanAmt,
+    finalCarVal, finalLeasePaid, finalBuyPaid: buyPaid,
+    finalLeaseInvest: leaseInvest, finalBuyInvest: buyInvest,
+    finalLeaseEconCost, finalBuyEconCost,
+    lastEndCost, endsAtBoundary,
+    buyWins, advantage, upfrontDiff, snapshots, loss3yr,
+    refundable, repeatDown, secDep, acqFee, disFee, leaseDown,
+    leaseMaint, buyMaint, leaseIns, buyIns, regRenewal, mileLimit,
+    mileageOverage: mileOver,
+  };
+}
+
+// ─── Charts ───────────────────────────────────────────────────────────
+let chartCost = null, chartInvest = null;
+
+function buildCharts(r) {
+  const labels = r.snapshots.map(s => 'Yr ' + s.year);
+  const blue  = '#1a6fa8', green = '#2d8a5e', gold = '#c9a84c';
+
+  const co = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: { legend: { labels: { font: { family: 'DM Mono', size: 10 }, color: '#5a7090' } }, tooltip: { titleFont: { family: 'DM Mono' }, bodyFont: { family: 'DM Mono' } } },
+    scales: {
+      x: { grid: { color: '#e8e0d4' }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#8aaac8' } },
+      y: { grid: { color: '#e8e0d4' }, ticks: { font: { family: 'DM Mono', size: 10 }, color: '#8aaac8', callback: v => '$' + (v/1000).toFixed(0) + 'k' } }
+    }
+  };
+
+  const costData = {
+    labels,
+    datasets: [
+      { label: 'Lease Net Cost', data: r.snapshots.map(s => s.leaseEconCost), borderColor: blue, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+      { label: 'Buy Net Cost',   data: r.snapshots.map(s => s.buyEconCost),   borderColor: green, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+    ]
+  };
+
+  const investData = {
+    labels,
+    datasets: [
+      { label: 'Lease Invest',  data: r.snapshots.map(s => s.leaseInvest), borderColor: blue,  backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+      { label: 'Buy Invest',    data: r.snapshots.map(s => s.buyInvest),   borderColor: green, backgroundColor: 'transparent', borderWidth: 2, pointRadius: 3, tension: 0.3 },
+      { label: 'Car Value',     data: r.snapshots.map(s => s.carValue),    borderColor: gold,  backgroundColor: 'transparent', borderWidth: 1.5, pointRadius: 2, tension: 0.3, borderDash: [5,4] },
+    ]
+  };
+
+  if (chartCost)   { chartCost.data   = costData;   chartCost.update();   }
+  else             { chartCost   = new Chart($('chart-cost'),   { type: 'line', data: costData,   options: co }); }
+
+  if (chartInvest) { chartInvest.data = investData; chartInvest.update(); }
+  else             { chartInvest = new Chart($('chart-invest'), { type: 'line', data: investData, options: co }); }
+}
+
+// ─── Render ───────────────────────────────────────────────────────────
+function render(r) {
+  // Summary bar
+  $('s-lease-mo').textContent  = fmtM(r.leaseMonthlyTotal);
+  $('s-lease-sub').textContent = r.excessMiles > 0 ? 'payment + ops + mileage overage' : 'payment + maint + ins + reg';
+  $('s-buy-mo').textContent    = fmtM(r.buyMonthlyTotal);
+  $('s-buy-sub').textContent   = r.compareYears + '-yr loan + ops (avg maint)';
+  $('s-winner-label').textContent = 'Over ' + r.compareYears + ' Yrs';
+  $('s-winner').textContent    = r.buyWins ? 'BUY WINS' : 'LEASE WINS';
+  $('s-winner-sub').textContent = 'saves ' + fmt(r.advantage);
+
+  // MF help
+  $('mf-help').textContent = '\u2248 ' + pct(r.mf * 2400) + ' APR';
+
+  // Lease breakdown
+  $('bd-capCost').textContent   = fmt(r.adjCapCost);
+  $('bd-residual').textContent  = fmt(r.residualVal);
+  $('bd-dep').textContent       = fmt(r.depMo);
+  $('bd-apr-note').textContent  = '(' + pct(r.mf * 2400) + ' APR)';
+  $('bd-fin').textContent       = fmt(r.finCharge);
+  $('bd-tax').textContent       = fmt(r.taxMo);
+  $('bd-total').textContent     = fmt(r.leasePmt);
+
+  const mwEl = $('bd-mileage-warn');
+  const miEl = $('bd-midlease-info');
+  if (r.excessMiles > 0) {
+    mwEl.style.display = 'block';
+    mwEl.textContent = '\u26a0 ' + r.excessMiles.toLocaleString() + ' excess mi/yr at $' + r.mileageOverage.toFixed(2) + '/mi = ' + fmt(r.mileagePenMo * 12) + '/yr in overages';
+  } else { mwEl.style.display = 'none'; }
+  if (!r.endsAtBoundary) {
+    miEl.style.display = 'block';
+    miEl.textContent = 'Note: ' + r.compareYears + '-year horizon ends mid-lease, so no disposition or wear-and-tear charges are applied at the cutoff.';
+  } else { miEl.style.display = 'none'; }
+
+  // Buy breakdown
+  $('bd-vtax').textContent    = fmt(r.vehicleTax);
+  $('bd-titlereg').textContent = fmt(r.titleReg);
+  $('bd-loan').textContent    = fmt(r.loanAmt);
+  $('bd-interest').textContent = fmt(r.totalInterest);
+  $('bd-upfront').textContent  = fmt(r.buyUpfront);
+  $('bd-loanpmt').textContent  = fmt(r.monthlyLoan);
+
+  // Dep grid
+  const dg = $('dep-grid');
+  dg.innerHTML = '';
+  for (let i = 0; i < Math.min(r.compareYears, 10); i++) {
+    const rate = DEP[i] ?? DEP[DEP.length-1];
+    const v = carVal(r.negPrice, (i+1)*12);
+    const row = document.createElement('div');
+    row.className = 'dep-row';
+    row.innerHTML = `<span class="dep-yr">Year ${i+1}<span class="dep-rate">(-${(rate*100).toFixed(0)}%)</span></span><span class="dep-val">${fmt(v)}</span>`;
+    dg.appendChild(row);
+  }
+
+  // Ops table
+  const ob = $('ops-table-body');
+  const opsRows = [
+    ['Loan / Lease Payment',  fmt(r.leasePmt),          fmt(r.monthlyLoan)],
+    ['Maintenance (avg)',      fmt(r.leaseMaint / 12),   fmt(r.buyMaint / 12)],
+    ['Insurance',             fmt(r.leaseIns / 12),     fmt(r.buyIns / 12)],
+    ['Registration',          fmt(r.regRenewal / 12),   fmt(r.regRenewal / 12)],
+    ...(r.excessMiles > 0 ? [['Mileage Overage', fmt(r.mileagePenMo), '—']] : []),
+  ];
+  const totalRow = ['Total / mo', fmt(r.leaseMonthlyTotal), fmt(r.buyMonthlyTotal)];
+  ob.innerHTML = [...opsRows.map(([l,lv,bv]) =>
+    `<div class="ops-row"><span class="ops-label">${l}</span><span class="ops-l">${lv}</span><span class="ops-b">${bv}</span></div>`
+  ), `<div class="ops-row ops-total"><span class="ops-label">${totalRow[0]}</span><span class="ops-l">${totalRow[1]}</span><span class="ops-b">${totalRow[2]}</span></div>`].join('');
+
+  // Winner banner
+  const wb = $('winner-banner');
+  wb.style.display = 'block';
+  wb.className = 'winner-banner ' + (r.buyWins ? 'buy-wins' : 'lease-wins');
+  $('wr-label').textContent = 'Over ' + r.compareYears + ' Years \u00b7 Economic Cost Analysis';
+  $('wr-word').textContent  = r.buyWins ? 'BUYING WINS' : 'LEASING WINS';
+  $('wr-amt').textContent   = fmt(r.advantage);
+  $('wr-note').textContent  = r.endsAtBoundary ? '' : 'Horizon ends mid-lease (' + r.compareYears + ' years does not land on a lease boundary) -- no final disposition or wear-and-tear applied.';
+
+  // Results stats
+  $('res-lease-cost').textContent   = fmt(r.finalLeaseEconCost);
+  $('res-buy-cost').textContent     = fmt(r.finalBuyEconCost);
+  $('res-lease-invest').textContent = fmt(r.finalLeaseInvest);
+  $('res-lease-invest-sub').textContent = 'from monthly savings at ' + r.investReturn + '%/yr';
+  $('res-buy-invest').textContent   = fmt(r.finalBuyInvest);
+  $('res-buy-invest-sub').textContent   = 'from monthly savings at ' + r.investReturn + '%/yr';
+  $('res-car-val').textContent      = fmt(r.finalCarVal);
+  $('res-car-sub').textContent      = 'staged depreciation, yr ' + r.compareYears;
+
+  const leEndEl = $('res-lease-end');
+  const leEndSub = $('res-lease-end-sub');
+  if (r.endsAtBoundary) {
+    leEndEl.textContent  = fmt(r.lastEndCost);
+    leEndSub.textContent = r.lastEndCost >= 0 ? 'disposition + wear/tear net' : 'net refund after deposit';
+    leEndEl.closest('.stat-card').className = 'stat-card ' + (r.lastEndCost >= 0 ? 'red' : 'green');
+  } else {
+    leEndEl.textContent  = 'N/A';
+    leEndSub.textContent = 'mid-lease horizon; none applied';
+    leEndEl.closest('.stat-card').className = 'stat-card';
+  }
+
+  // Insights
+  const mfAPR = r.mf * 2400;
+  const loanAPR = num('loanAPR');
+  const insights = [
+    {
+      icon: '📐',
+      warn: mfAPR > loanAPR + 1,
+      head: 'Money Factor vs Loan APR',
+      text: `Your money factor of ${r.mf} equals ${pct(mfAPR)} APR. Your buy loan is ${pct(loanAPR)}. ${mfAPR > loanAPR ? 'Lease financing is more expensive here.' : 'Lease financing is cheaper here.'}`,
+    },
+    {
+      icon: '💰',
+      warn: false,
+      head: r.upfrontDiff > 0 ? 'Leaser Invests the Upfront Difference' : 'Buyer Invests the Upfront Difference',
+      text: r.upfrontDiff > 0
+        ? `Buying requires ${fmt(r.upfrontDiff)} more upfront. The leaser invests that difference from day one.`
+        : `Leasing requires ${fmt(-r.upfrontDiff)} more upfront. The buyer invests that difference from day one.`,
+    },
+    {
+      icon: '📉',
+      warn: false,
+      head: 'Front-Loaded Depreciation',
+      text: `Car loses ~${(r.loss3yr*100).toFixed(0)}% of value in years 1-3 on a compounded basis (year-by-year rates: 20%, 15%, 12%). After year ${r.compareYears}, estimated resale is ${fmt(r.finalCarVal)} -- why buying starts to win if you hold longer.`,
+    },
+    {
+      icon: '🔄',
+      warn: false,
+      head: 'Lease Renewal Friction',
+      text: `Each ${r.leaseTerm}-month renewal adds ${fmt(r.acqFee)} acq fee + ${fmt(r.disFee)} disposition fee${r.repeatDown ? ' + ' + fmt(r.leaseDown) + ' down' : ''}. Rough renewal estimate: over ${r.compareYears} years, ~${fmt(Math.floor((r.compareYears*12-1)/r.leaseTerm)*(r.acqFee+r.disFee+(r.repeatDown?r.leaseDown:0)))} in renewal costs.`,
+    },
+    ...(r.excessMiles > 0 ? [{
+      icon: '🛣️',
+      warn: true,
+      head: 'Mileage Penalty Active',
+      text: `${r.excessMiles.toLocaleString()} excess mi/yr at $${r.mileageOverage.toFixed(2)}/mi = ${fmt(r.mileagePenMo*12)}/yr in penalties. This significantly raises the lease cost.`,
+    }] : []),
+  ];
+
+  $('insights-body').innerHTML = insights.map(i => `
+    <div class="insight-row${i.warn ? ' warn' : ''}">
+      <div class="insight-icon">${i.icon}</div>
+      <div class="insight-body">
+        <div class="insight-head">${i.head}</div>
+        <div class="insight-text">${i.text}</div>
+      </div>
+    </div>`).join('');
+
+  // Table
+  $('table-note').textContent = 'Economic cost = total paid minus investment gains minus car value (buy). The final year reflects lease-end settlement' +
+    (r.endsAtBoundary ? '.' : ' (none applied -- horizon ends mid-lease).');
+
+  $('table-body').innerHTML = r.snapshots.map(s => {
+    const lw = s.leaseEconCost < s.buyEconCost;
+    return `<tr>
+      <td>${s.year}</td>
+      <td>${fmt(s.leasePaid)}</td>
+      <td class="val-blue">${fmt(s.leaseInvest)}</td>
+      <td class="${lw ? 'win' : ''}">${fmt(s.leaseEconCost)}</td>
+      <td>${fmt(s.buyPaid)}</td>
+      <td class="val-gold">${fmt(s.carValue)}</td>
+      <td class="val-blue" style="color:var(--green)">${fmt(s.buyInvest)}</td>
+      <td class="${!lw ? 'win' : ''}">${fmt(s.buyEconCost)}</td>
+    </tr>`;
+  }).join('');
+
+  // Assumptions
+  $('assumptions-note').innerHTML = `<strong>Model assumptions:</strong> Lease renewals: same payment structure; adds acq fee + disposition fee each cycle; down payment at renewal ${r.repeatDown ? 'included' : 'not repeated'}; security deposit ${r.refundable ? 'refunded and re-collected' : 'non-refundable, treated as cost'} at each renewal. Final settlement only applied when horizon aligns with lease end. Depreciation: staged yearly rates (20/15/12/10/8/7/6/5%). Buy maintenance stepped: 55% of base yr 1-3, 100% yr 4-5, 145% yr 6+. Opportunity cost: symmetric month-by-month at ${r.investReturn}%/yr. Lease tax: monthly on payment by default; state rules vary.`;
+
+  buildCharts(r);
+}
+
+// ─── Recalc + debounce ────────────────────────────────────────────────
+let timer = null;
+function recalc() {
+  clearTimeout(timer);
+  timer = setTimeout(() => { try { render(calc()); } catch(e) { console.error(e); } }, 80);
+}
+
+document.querySelectorAll('input[type=number]').forEach(inp => inp.addEventListener('input', recalc));
+
+// ─── Tab switching ────────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    $('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+// ─── Initial render ───────────────────────────────────────────────────
+render(calc());
+</script>
+</body>
+</html>
